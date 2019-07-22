@@ -41,6 +41,7 @@ protected:
     void DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults);
 
 private:
+    uint8_t m_measId;
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
     LteHandoverManagementSapProvider *m_handoverManagementSapProvider;
 };

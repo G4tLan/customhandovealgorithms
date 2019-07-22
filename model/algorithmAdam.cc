@@ -38,6 +38,32 @@ LteHandoverManagementSapProvider* algorithmAdam::GetLteHandoverManagementSapProv
 
 void algorithmAdam::DoInitialize()
 {
+    LteRrcSap::ReportConfigEutra reportConfigA2;
+    reportConfigA2.eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
+    reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA2.threshold1.range = 2;
+    reportConfigA2.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
+    reportConfigA2.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
+    m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA2);
+
+    LteRrcSap::ReportConfigEutra reportConfig;
+    reportConfig.eventId = LteRrcSap::ReportConfigEutra::EVENT_A3;
+    reportConfig.a3Offset = 0;
+    reportConfig.hysteresis = 1;
+    reportConfig.timeToTrigger = 500;
+    reportConfig.reportOnLeave = false;
+    reportConfig.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRP;
+    reportConfig.reportInterval = LteRrcSap::ReportConfigEutra::MS1024;
+    m_measId = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfig);
+
+    LteRrcSap::ReportConfigEutra reportConfigA4;
+    reportConfigA4.eventId = LteRrcSap::ReportConfigEutra::EVENT_A4;
+    reportConfigA4.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA4.threshold1.range = 0; // intentionally very low threshold
+    reportConfigA4.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
+    reportConfigA4.reportInterval = LteRrcSap::ReportConfigEutra::MS480;
+    m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA4);
+
     LteHandoverAlgorithm::DoInitialize();
 }
 
