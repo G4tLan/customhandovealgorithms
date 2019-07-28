@@ -41,9 +41,13 @@ protected:
     void DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults);
 
 private:
-    uint8_t m_measId;
+    uint8_t m_measId_A2;
+    uint8_t m_measId_A4;
+    uint8_t m_servingCellThreshold;
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
     LteHandoverManagementSapProvider *m_handoverManagementSapProvider;
+
+    void printEvent(uint8_t event) ;
 };
 } // namespace ns3
 

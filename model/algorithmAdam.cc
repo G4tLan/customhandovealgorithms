@@ -38,31 +38,22 @@ LteHandoverManagementSapProvider* algorithmAdam::GetLteHandoverManagementSapProv
 
 void algorithmAdam::DoInitialize()
 {
+    
     LteRrcSap::ReportConfigEutra reportConfigA2;
     reportConfigA2.eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
     reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
-    reportConfigA2.threshold1.range = 2;
+    reportConfigA2.threshold1.range = 30; //serving cell threshold
     reportConfigA2.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
     reportConfigA2.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
-    m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA2);
-
-    LteRrcSap::ReportConfigEutra reportConfig;
-    reportConfig.eventId = LteRrcSap::ReportConfigEutra::EVENT_A3;
-    reportConfig.a3Offset = 0;
-    reportConfig.hysteresis = 1;
-    reportConfig.timeToTrigger = 500;
-    reportConfig.reportOnLeave = false;
-    reportConfig.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRP;
-    reportConfig.reportInterval = LteRrcSap::ReportConfigEutra::MS1024;
-    m_measId = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfig);
+    m_measId_A2 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA2);
 
     LteRrcSap::ReportConfigEutra reportConfigA4;
     reportConfigA4.eventId = LteRrcSap::ReportConfigEutra::EVENT_A4;
     reportConfigA4.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
-    reportConfigA4.threshold1.range = 0; // intentionally very low threshold
+    reportConfigA4.threshold1.range = 0; //serving cell threshold
     reportConfigA4.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
     reportConfigA4.reportInterval = LteRrcSap::ReportConfigEutra::MS480;
-    m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA4);
+    m_measId_A4 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA4);
 
     LteHandoverAlgorithm::DoInitialize();
 }
@@ -72,9 +63,26 @@ void algorithmAdam::DoDispose()
     delete m_handoverManagementSapProvider;
 }
 
+void algorithmAdam::printEvent(uint8_t event) {
+    switch( (uint32_t) event) {
+        case 1:
+            std::cout << " event A2 occured ";
+            break;
+        case 2:
+            std::cout << " event A4 occured ";
+            break;
+        default:
+            std::cout << " unknown event occured ";
+            break;
+    }
+}
+
 void algorithmAdam::DoReportUeMeas (uint16_t rnti, LteRrcSap::MeasResults measResults)
 {
-    std::cout << "reporting by: " << rnti << " " << measResults.rsrpResult << std::endl;
+    if( measResults.measId == m_measId_A2) {
+        std::cout << Simulator::Now().GetSeconds() << " rsrp " << (uint32_t) measResults.rsrpResult
+        << " rsrq " << (uint32_t) measResults.rsrqResult << std::endl;
+    }
 }
 
 } // namespace ns3
