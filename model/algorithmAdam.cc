@@ -1,5 +1,6 @@
 #include "algorithmAdam.h"
 #include <ns3/log.h>
+#include "../../../scratch/UE.h"
 
 namespace ns3
 {
@@ -19,26 +20,26 @@ algorithmAdam::~algorithmAdam()
 TypeId algorithmAdam::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::algorithmAdam")
-    .SetParent<LteHandoverAlgorithm>()
-    .SetGroupName("Lte")
-    .AddConstructor<algorithmAdam>();
+                            .SetParent<LteHandoverAlgorithm>()
+                            .SetGroupName("Lte")
+                            .AddConstructor<algorithmAdam>();
 
     return tid;
 }
 
-void algorithmAdam::SetLteHandoverManagementSapUser(LteHandoverManagementSapUser* s)
+void algorithmAdam::SetLteHandoverManagementSapUser(LteHandoverManagementSapUser *s)
 {
     m_handoverManagementSapUser = s;
 }
 
-LteHandoverManagementSapProvider* algorithmAdam::GetLteHandoverManagementSapProvider()
+LteHandoverManagementSapProvider *algorithmAdam::GetLteHandoverManagementSapProvider()
 {
     return m_handoverManagementSapProvider;
 }
 
 void algorithmAdam::DoInitialize()
 {
-    
+
     LteRrcSap::ReportConfigEutra reportConfigA2;
     reportConfigA2.eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
     reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
@@ -58,31 +59,49 @@ void algorithmAdam::DoInitialize()
     LteHandoverAlgorithm::DoInitialize();
 }
 
-void algorithmAdam::DoDispose() 
+void algorithmAdam::DoDispose()
 {
     delete m_handoverManagementSapProvider;
 }
 
-void algorithmAdam::printEvent(uint8_t event) {
-    switch( (uint32_t) event) {
-        case 1:
-            std::cout << " event A2 occured ";
-            break;
-        case 2:
-            std::cout << " event A4 occured ";
-            break;
-        default:
-            std::cout << " unknown event occured ";
-            break;
-    }
-}
-
-void algorithmAdam::DoReportUeMeas (uint16_t rnti, LteRrcSap::MeasResults measResults)
+void algorithmAdam::printEvent(uint8_t event)
 {
-    if( measResults.measId == m_measId_A2) {
-        std::cout << Simulator::Now().GetSeconds() << " rsrp " << (uint32_t) measResults.rsrpResult
-        << " rsrq " << (uint32_t) measResults.rsrqResult << std::endl;
+    switch ((uint32_t)event)
+    {
+    case 1:
+        std::cout << " event A2 occured ";
+        break;
+    case 2:
+        std::cout << " event A4 occured ";
+        break;
+    default:
+        std::cout << " unknown event occured ";
+        break;
     }
 }
 
+void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults)
+{
+    if (measResults.measId == m_measId_A2)
+    {
+        std::cout << Simulator::Now().GetSeconds() << " rsrp " << (uint32_t)measResults.rsrpResult
+                  << " rsrq " << (uint32_t)measResults.rsrqResult << std::endl;
+
+        try
+        {
+            for (auto const &x : ns3::UE::uePositionHistory)
+            {
+                auto p1 = x.second.p1;
+                auto p2 = x.second.p2;
+                std::cout << " id: " << x.first << " positions: {"
+                          << "{" << p1.x << "," << p1.y << "} --"
+                          << "{" << p2.x << "," << p2.y << "}}" << std::endl;
+            }
+        }
+        catch (...)
+        {
+            std::cout << "position history exception" << std::endl;
+        }
+    }
+}
 } // namespace ns3
