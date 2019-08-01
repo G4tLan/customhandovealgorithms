@@ -80,28 +80,36 @@ void algorithmAdam::printEvent(uint8_t event)
     }
 }
 
+void algorithmAdam::setCellId(uint16_t _cellId) {
+    cellId = (uint32_t)_cellId;
+}
+
 void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults)
 {
+
     if (measResults.measId == m_measId_A2)
     {
-        std::cout << Simulator::Now().GetSeconds() << " rsrp " << (uint32_t)measResults.rsrpResult
-                  << " rsrq " << (uint32_t)measResults.rsrqResult << std::endl;
+        std::cout << Simulator::Now().GetSeconds() << " rnti " << rnti << ", sourcecell " << cellId << std::endl;
+        
+       auto it = ns3::UE::uePositionHistory.find(std::make_pair(rnti, cellId));
 
-        try
-        {
-            for (auto const &x : ns3::UE::uePositionHistory)
-            {
-                auto p1 = x.second.p1;
-                auto p2 = x.second.p2;
-                std::cout << " id: " << x.first << " positions: {"
-                          << "{" << p1.x << "," << p1.y << "} --"
-                          << "{" << p2.x << "," << p2.y << "}}" << std::endl;
-            }
-        }
-        catch (...)
-        {
-            std::cout << "position history exception" << std::endl;
-        }
+       if(it != ns3::UE::uePositionHistory.end()){
+           auto p1 = it->second.p1;
+           auto p2 = it->second.p2;
+           std::cout <<" {{" << p1.x << " , " << p1.y << "} -- {"
+                     << p2.x << " , " << p2.y << "}}" << std::endl;
+       }
+       
     }
+       if (measResults.haveMeasResultNeighCells
+           && !measResults.measResultListEutra.empty ())
+         {
+           for (std::list <LteRrcSap::MeasResultEutra>::iterator it = measResults.measResultListEutra.begin ();
+                it != measResults.measResultListEutra.end ();
+                ++it)
+             {
+               std::cout << rnti << " , " << it->physCellId << std::endl;
+             }
+         }
 }
 } // namespace ns3
