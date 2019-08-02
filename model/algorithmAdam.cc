@@ -89,27 +89,11 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
 
     if (measResults.measId == m_measId_A2)
     {
-        std::cout << Simulator::Now().GetSeconds() << " rnti " << rnti << ", sourcecell " << cellId << std::endl;
+        //std::cout << Simulator::Now().GetSeconds() << " rnti " << rnti << ", sourcecell " << cellId << std::endl;
         
-       auto it = ns3::UE::uePositionHistory.find(std::make_pair(rnti, cellId));
-
-       if(it != ns3::UE::uePositionHistory.end()){
-           auto p1 = it->second.p1;
-           auto p2 = it->second.p2;
-           std::cout <<" {{" << p1.x << " , " << p1.y << "} -- {"
-                     << p2.x << " , " << p2.y << "}}" << std::endl;
-       }
+       //auto it = ns3::UE::uePositionHistory.find(std::make_pair(rnti, cellId));
        
+       std::cout << measResults.uePosition.x << ", " << measResults.uePosition.y << std::endl;
     }
-       if (measResults.haveMeasResultNeighCells
-           && !measResults.measResultListEutra.empty ())
-         {
-           for (std::list <LteRrcSap::MeasResultEutra>::iterator it = measResults.measResultListEutra.begin ();
-                it != measResults.measResultListEutra.end ();
-                ++it)
-             {
-               std::cout << rnti << " , " << it->physCellId << std::endl;
-             }
-         }
 }
 } // namespace ns3

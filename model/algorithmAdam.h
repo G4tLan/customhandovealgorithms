@@ -15,6 +15,7 @@
 #include <ns3/simple-ref-count.h>
 #include <ns3/ptr.h>
 #include <map>
+#include <ns3/vector.h>
 
 namespace ns3
 {
@@ -25,6 +26,13 @@ public:
     virtual ~algorithmAdam();
 
     static TypeId GetTypeId();
+
+    struct historicalHandover {
+        uint32_t sourceCellId;
+        uint32_t targetCellId;
+        double trajectoryAngle;
+        Vector targetCellPosition;
+    };
 
     //inherited from LTEhandoverAlgorithm
     virtual void SetLteHandoverManagementSapUser(LteHandoverManagementSapUser *s);
@@ -49,6 +57,8 @@ private:
     uint32_t cellId;
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
     LteHandoverManagementSapProvider *m_handoverManagementSapProvider;
+    //key value is ue rnti and cellid
+    std::map<std::pair<uint32_t, uint32_t>, std::vector<algorithmAdam::historicalHandover>> UeHistoricalHandover;
 
     void printEvent(uint8_t event) ;
 };
