@@ -1,6 +1,7 @@
 #include "algorithmAdam.h"
 #include <ns3/log.h>
 #include "../../../scratch/UE.h"
+#include <math.h>
 
 namespace ns3
 {
@@ -84,16 +85,37 @@ void algorithmAdam::setCellId(uint16_t _cellId) {
     cellId = (uint32_t)_cellId;
 }
 
+double calculateAngle(Vector p1, Vector p2) {
+    return atan((p2.y - p1.y)/(p2.x - p1.x));
+}
+
 void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults)
 {
 
     if (measResults.measId == m_measId_A2)
     {
-        //std::cout << Simulator::Now().GetSeconds() << " rnti " << rnti << ", sourcecell " << cellId << std::endl;
-        
-       //auto it = ns3::UE::uePositionHistory.find(std::make_pair(rnti, cellId));
-       
-       std::cout << measResults.uePosition.x << ", " << measResults.uePosition.y << std::endl;
+        Vector ueCurrentPosition = measResults.uePosition;
+        Vector uePreviousPosition = ns3::UE::uePositionHistory.find(std::make_pair(rnti, cellId))->second.p1;
+        double beta = calculateAngle(uePreviousPosition, ueCurrentPosition);
+
+        auto handoverIt = UeHistoricalHandover.find(std::make_pair(rnti, cellId));
+
+        if(handoverIt != UeHistoricalHandover.end()){
+            auto records = handoverIt->second;
+            for(auto it = records.begin(); it != records.end(); it++){
+                if(fabs(it->trajectoryAngle - beta) <= 11.0){
+                    if( fabs(it->uePresentPosition.x - ueCurrentPosition.x ) <= 2.0 && 
+                        fabs(it->uePresentPosition.y - ueCurrentPosition.y ) <= 2.0){
+                            m_handoverManagementSapUser->TriggerHandover(rnti,it->targetCellId);
+                            break;
+                    }
+                } else {
+                    //select target enb and handover
+                }
+            }
+        } else {
+            //select target enb and handover
+        }
     }
 }
 } // namespace ns3

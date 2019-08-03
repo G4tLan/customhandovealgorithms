@@ -31,7 +31,7 @@ public:
         uint32_t sourceCellId;
         uint32_t targetCellId;
         double trajectoryAngle;
-        Vector targetCellPosition;
+        Vector uePresentPosition;
     };
 
     //inherited from LTEhandoverAlgorithm
