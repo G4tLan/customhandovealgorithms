@@ -61,6 +61,7 @@ private:
     std::map<std::pair<uint32_t, uint32_t>, std::vector<algorithmAdam::historicalHandover>> UeHistoricalHandover;
 
     void printEvent(uint8_t event) ;
+    uint32_t searchTargetEnb(Vector ueCurentPos, Vector uePreviousPosition);
 };
 } // namespace ns3
 
