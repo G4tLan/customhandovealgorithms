@@ -52,7 +52,7 @@ protected:
 
 private:
     uint8_t m_measId_A2;
-    uint8_t m_measId_A4;
+    uint8_t m_measId_A1;
     uint8_t m_servingCellThreshold;
     uint32_t cellId;
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
