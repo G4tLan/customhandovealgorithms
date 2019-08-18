@@ -129,8 +129,8 @@ uint32_t algorithmAdam::searchTargetEnb(Vector ueCurrentPosition, Vector uePrevi
             Enbs::enbPositions.find(*i)->second);
         bool capacity = true;
 
-        if(*i == 2)
-            std::cout<< *i << " measures dc  " << dc << " Oc " << Oc << " Oct " << angleThresh<< " t-> " << Simulator::Now().GetSeconds() << std::endl;
+        // if(*i == 2)
+        //     std::cout<< *i << " measures dc  " << dc << " Oc " << Oc << " Oct " << angleThresh<< " t-> " << Simulator::Now().GetSeconds() << std::endl;
 
         if(dc <= radius && Oc <= angleThresh && capacity ) {
             weightData d;
