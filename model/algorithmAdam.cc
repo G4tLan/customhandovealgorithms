@@ -42,13 +42,16 @@ LteHandoverManagementSapProvider *algorithmAdam::GetLteHandoverManagementSapProv
 
 void algorithmAdam::DoInitialize()
 {
+    ns3::Time ttt = MilliSeconds(10);
+    uint8_t hysteresisIeValue = EutranMeasurementMapping::ActualHysteresis2IeValue (7);
 
     LteRrcSap::ReportConfigEutra reportConfigA2;
     reportConfigA2.eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
-    reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRP;
     reportConfigA2.threshold1.range = 20; //serving cell threshold
-    //reportConfigA2.timeToTrigger = 10; //ms
-    reportConfigA2.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
+    reportConfigA2.timeToTrigger = ttt.GetMilliSeconds(); //ms
+    reportConfigA2.hysteresis = hysteresisIeValue;
+    reportConfigA2.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRP;
     reportConfigA2.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
     m_measId_A2 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA2);
 
@@ -129,9 +132,6 @@ uint32_t algorithmAdam::searchTargetEnb(Vector ueCurrentPosition, Vector uePrevi
             Enbs::enbPositions.find(*i)->second);
         bool capacity = true;
 
-        // if(*i == 2)
-        //     std::cout<< *i << " measures dc  " << dc << " Oc " << Oc << " Oct " << angleThresh<< " t-> " << Simulator::Now().GetSeconds() << std::endl;
-
         if(dc <= radius && Oc <= angleThresh && capacity ) {
             weightData d;
             d.cellid = *i;
@@ -153,22 +153,19 @@ uint32_t algorithmAdam::searchTargetEnb(Vector ueCurrentPosition, Vector uePrevi
     return bestNeigh.cellid;
 }
 
+int count = 0;
+
 void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults)
 {
 
-    if (measResults.measId == m_measId_A2 || measResults.measId == m_measId_A1)
+    //std::cout << measResults.rsrpResult << 
+    if (measResults.measId == m_measId_A2)
     {
-        // std::cout << " imsi " << measResults.imsi << std::endl;
-        //std::cout << " measured rsrp " << (uint32_t)measResults.rsrpResult << std::endl;
-       /* std::cout << "cell pos " << Enbs::enbPositions.find(cellId)->second 
-            << " ue pos " << measResults.uePosition
-            << " measured rsrq " << (uint32_t)measResults.rsrqResult
-            << " measured rsrp " << (uint32_t)measResults.rsrpResult << std::endl;*/
         Vector ueCurrentPosition = measResults.uePosition;
         Vector uePreviousPosition = ns3::UE::uePositionHistory.find(measResults.imsi)->second.p1;
         double beta = calculateAngle(uePreviousPosition, ueCurrentPosition);
 
-        auto handoverIt = UeHistoricalHandover.find(std::make_pair(rnti, cellId));
+        auto handoverIt = UeHistoricalHandover.find(measResults.imsi);
         bool handedOver = false;
 
         if(handoverIt != UeHistoricalHandover.end()){
@@ -180,7 +177,8 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                         fabs(it->uePresentPosition.y - ueCurrentPosition.y ) <= 1.0){
                             if(capacity){
                                 if(it->targetCellId){
-                                // std::cout << " handover exist " << it->targetCellId << std::endl;
+                                // std::cout << " handover exist " << it->targetCellId <<
+                                //     " t-> "<< Simulator::Now().GetSeconds() << std::endl;
                                     // std::cout << " rnti " << rnti << " target cell " << it->targetCellId << std::endl;
                                     m_handoverManagementSapUser->
                                         TriggerHandover(rnti,it->targetCellId);
@@ -193,10 +191,13 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                                     searchTargetEnb(ueCurrentPosition,uePreviousPosition);
                                 if(targetCell){
                                     it->targetCellId = targetCell;
-                                    // std::cout << " handover update " << targetCell << std::endl;
+                                    // std::cout << " handover update " << targetCell <<
+                                    //     " t-> "<< Simulator::Now().GetSeconds() << std::endl;
                                     // std::cout << " rnti " << rnti << " target cell " << targetCell << std::endl;
                                     m_handoverManagementSapUser
                                         ->TriggerHandover(rnti,targetCell);
+                                    handedOver = true;
+                                    break;
                                 }
                             }
                     }
@@ -218,14 +219,12 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                 {
                     std::vector<algorithmAdam::historicalHandover> vh;
                     vh.push_back(h);
-                    UeHistoricalHandover.insert(std::make_pair(
-                        std::make_pair((uint32_t)rnti, cellId), vh));
+                    UeHistoricalHandover.insert(std::make_pair(measResults.imsi, vh));
                 }
-                // std::cout << " target cell " << targetCell << std::endl;
-                // std::cout << " handover new " << targetCell << " t-> "<< Simulator::Now().GetSeconds() << std::endl;
-                // std::cout << " rnti " << rnti << " target cell " << targetCell << std::endl;
-                m_handoverManagementSapUser
-                    ->TriggerHandover(rnti, targetCell);
+                // std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
+                //             " t-> "<< Simulator::Now().GetSeconds() << std::endl;
+                    m_handoverManagementSapUser
+                        ->TriggerHandover(rnti, targetCell);
             }
         }
     }

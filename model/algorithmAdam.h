@@ -58,7 +58,7 @@ private:
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
     LteHandoverManagementSapProvider *m_handoverManagementSapProvider;
     //key value is ue rnti and cellid
-    std::map<std::pair<uint32_t, uint32_t>, std::vector<algorithmAdam::historicalHandover>> UeHistoricalHandover;
+    std::map<uint64_t, std::vector<algorithmAdam::historicalHandover>> UeHistoricalHandover;
 
     void printEvent(uint8_t event) ;
     uint32_t searchTargetEnb(Vector ueCurentPos, Vector uePreviousPosition);
