@@ -180,8 +180,8 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                                 // std::cout << " handover exist " << it->targetCellId <<
                                 //     " t-> "<< Simulator::Now().GetSeconds() << std::endl;
                                     // std::cout << " rnti " << rnti << " target cell " << it->targetCellId << std::endl;
-                                    // m_handoverManagementSapUser->
-                                    //     TriggerHandover(rnti,it->targetCellId);
+                                    m_handoverManagementSapUser->
+                                        TriggerHandover(rnti,it->targetCellId);
                                     handedOver = true;
                                     break;
                                 }
@@ -194,8 +194,8 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                                     // std::cout << " handover update " << targetCell <<
                                     //     " t-> "<< Simulator::Now().GetSeconds() << std::endl;
                                     // std::cout << " rnti " << rnti << " target cell " << targetCell << std::endl;
-                                    // m_handoverManagementSapUser
-                                    //     ->TriggerHandover(rnti,targetCell);
+                                    m_handoverManagementSapUser
+                                        ->TriggerHandover(rnti,targetCell);
                                     handedOver = true;
                                     break;
                                 }
