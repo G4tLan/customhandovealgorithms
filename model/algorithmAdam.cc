@@ -13,6 +13,7 @@ NS_OBJECT_ENSURE_REGISTERED(algorithmAdam);
 algorithmAdam::algorithmAdam() : m_handoverManagementSapUser(0)
 {
     m_handoverManagementSapProvider = new MemberLteHandoverManagementSapProvider<algorithmAdam>(this);
+    handoverEvents = {};
 }
 
 algorithmAdam::~algorithmAdam()
@@ -221,10 +222,22 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                     vh.push_back(h);
                     UeHistoricalHandover.insert(std::make_pair(measResults.imsi, vh));
                 }
-                std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
+                    auto ongoingIt = handoverEvents.find(measResults.imsi);
+                    if(ongoingIt == handoverEvents.end()){
+                        m_handoverManagementSapUser
+                            ->TriggerHandover(rnti, targetCell);
+                        std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
                             " t-> "<< Simulator::Now().GetSeconds() << std::endl;
-                    m_handoverManagementSapUser
-                        ->TriggerHandover(rnti, targetCell);
+                        handoverEvents[measResults.imsi] = rnti;
+                    } else {
+                        if(ongoingIt->second != rnti){
+                            ongoingIt->second = rnti;
+                            m_handoverManagementSapUser
+                            ->TriggerHandover(rnti, targetCell);
+                            std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
+                                " t-> "<< Simulator::Now().GetSeconds() << std::endl;
+                        }
+                    }
             }
         }
     }
