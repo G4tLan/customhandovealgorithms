@@ -6,8 +6,8 @@
  * 
  */
 
-#ifndef SCRATCH_ALGORITHM_ADAM_H
-#define SCRATCH_ALGORITHM_ADAM_H
+#ifndef SCRATCH_SONG_MOON_ALGORITHM_H
+#define SCRATCH_SONG_MOON_ALGORITHM_H
 
 #include <ns3/lte-handover-algorithm.h>
 #include <ns3/lte-handover-management-sap.h>
@@ -21,11 +21,11 @@
 
 namespace ns3
 {
-class algorithmAdam : public LteHandoverAlgorithm
+class songMoonAlgorithm : public LteHandoverAlgorithm
 {
 public:
-    algorithmAdam();
-    virtual ~algorithmAdam();
+    songMoonAlgorithm();
+    virtual ~songMoonAlgorithm();
 
     static TypeId GetTypeId();
 
@@ -40,7 +40,7 @@ public:
     virtual void SetLteHandoverManagementSapUser(LteHandoverManagementSapUser *s);
     virtual LteHandoverManagementSapProvider *GetLteHandoverManagementSapProvider();
 
-    friend class MemberLteHandoverManagementSapProvider<algorithmAdam>;
+    friend class MemberLteHandoverManagementSapProvider<songMoonAlgorithm>;
 
 protected:
     //inherited from object
@@ -60,7 +60,7 @@ private:
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
     LteHandoverManagementSapProvider *m_handoverManagementSapProvider;
     //key value is ue rnti and cellid
-    std::map<uint64_t, std::vector<algorithmAdam::historicalHandover>> UeHistoricalHandover;
+    std::map<uint64_t, std::vector<songMoonAlgorithm::historicalHandover>> UeHistoricalHandover;
     std::map<uint64_t, uint16_t> handoverEvents;
 
     void printEvent(uint8_t event) ;

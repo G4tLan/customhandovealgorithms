@@ -1,45 +1,45 @@
-#include "algorithmAdam.h"
+#include "songMoonAlgorithm.h"
 #include <algorithm> 
 #include <ns3/log.h>
 #include <math.h>
 
 namespace ns3
 {
-NS_LOG_COMPONENT_DEFINE("algorithmAdam");
-NS_OBJECT_ENSURE_REGISTERED(algorithmAdam);
+NS_LOG_COMPONENT_DEFINE("songMoonAlgorithm");
+NS_OBJECT_ENSURE_REGISTERED(songMoonAlgorithm);
 
-algorithmAdam::algorithmAdam() : m_handoverManagementSapUser(0)
+songMoonAlgorithm::songMoonAlgorithm() : m_handoverManagementSapUser(0)
 {
-    m_handoverManagementSapProvider = new MemberLteHandoverManagementSapProvider<algorithmAdam>(this);
+    m_handoverManagementSapProvider = new MemberLteHandoverManagementSapProvider<songMoonAlgorithm>(this);
     handoverEvents = {};
 }
 
-algorithmAdam::~algorithmAdam()
+songMoonAlgorithm::~songMoonAlgorithm()
 {
-    std::cout << "destroying Adam algo" << std::endl;
+    std::cout << "destroying song Moon Algorithm" << std::endl;
 }
 
-TypeId algorithmAdam::GetTypeId()
+TypeId songMoonAlgorithm::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::algorithmAdam")
+    static TypeId tid = TypeId("ns3::songMoonAlgorithm")
                             .SetParent<LteHandoverAlgorithm>()
                             .SetGroupName("Lte")
-                            .AddConstructor<algorithmAdam>();
+                            .AddConstructor<songMoonAlgorithm>();
 
     return tid;
 }
 
-void algorithmAdam::SetLteHandoverManagementSapUser(LteHandoverManagementSapUser *s)
+void songMoonAlgorithm::SetLteHandoverManagementSapUser(LteHandoverManagementSapUser *s)
 {
     m_handoverManagementSapUser = s;
 }
 
-LteHandoverManagementSapProvider *algorithmAdam::GetLteHandoverManagementSapProvider()
+LteHandoverManagementSapProvider *songMoonAlgorithm::GetLteHandoverManagementSapProvider()
 {
     return m_handoverManagementSapProvider;
 }
 
-void algorithmAdam::DoInitialize()
+void songMoonAlgorithm::DoInitialize()
 {
     ns3::Time ttt = MilliSeconds(10);
     uint8_t hysteresisIeValue = EutranMeasurementMapping::ActualHysteresis2IeValue (7);
@@ -66,12 +66,12 @@ void algorithmAdam::DoInitialize()
     LteHandoverAlgorithm::DoInitialize();
 }
 
-void algorithmAdam::DoDispose()
+void songMoonAlgorithm::DoDispose()
 {
     delete m_handoverManagementSapProvider;
 }
 
-void algorithmAdam::printEvent(uint8_t event)
+void songMoonAlgorithm::printEvent(uint8_t event)
 {
     switch ((uint32_t)event)
     {
@@ -87,11 +87,13 @@ void algorithmAdam::printEvent(uint8_t event)
     }
 }
 
-void algorithmAdam::setCellId(uint16_t _cellId) {
+void songMoonAlgorithm::setCellId(uint16_t _cellId) {
     cellId = (uint32_t)_cellId;
 }
 
-uint32_t algorithmAdam::searchTargetEnb(Vector ueCurrentPosition, Vector uePreviousPosition) {
+
+
+uint32_t songMoonAlgorithm::searchTargetEnb(Vector ueCurrentPosition, Vector uePreviousPosition) {
     std::vector<uint32_t> neighCellIds = Enbs::enbNeighbours.find(cellId)->second;
     struct weightData {
         uint32_t cellid;
@@ -133,7 +135,7 @@ uint32_t algorithmAdam::searchTargetEnb(Vector ueCurrentPosition, Vector uePrevi
     return bestNeigh.cellid;
 }
 
-void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults)
+void songMoonAlgorithm::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measResults)
 {
 
     //std::cout << measResults.rsrpResult << 
@@ -195,7 +197,7 @@ void algorithmAdam::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults measRes
                 }
                 else
                 {
-                    std::vector<algorithmAdam::historicalHandover> vh;
+                    std::vector<songMoonAlgorithm::historicalHandover> vh;
                     vh.push_back(h);
                     UeHistoricalHandover.insert(std::make_pair(measResults.imsi, vh));
                 }
