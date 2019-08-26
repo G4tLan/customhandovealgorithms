@@ -58,8 +58,11 @@ protected:
     void setCellId(uint16_t cellId);
 
 private:
-    uint8_t m_measId_A2;
     uint8_t m_measId_A1;
+    uint8_t m_measId_A2;
+    uint8_t m_measId_A3;
+    uint8_t m_measId_A4;
+    uint8_t m_measId_A5;
     uint8_t m_servingCellThreshold;
     uint32_t cellId;
     LteHandoverManagementSapUser *m_handoverManagementSapUser;
@@ -67,6 +70,14 @@ private:
     //key value is ue rnti and cellid
     std::map<uint64_t, std::vector<songMoonAlgorithm::historicalHandover>> UeHistoricalHandover;
     std::map<uint64_t, uint16_t> handoverEvents;
+
+    LteRrcSap::ReportConfigEutra reportConfigA1;
+    LteRrcSap::ReportConfigEutra reportConfigA2;
+    LteRrcSap::ReportConfigEutra reportConfigA3;
+    LteRrcSap::ReportConfigEutra reportConfigA4;
+    LteRrcSap::ReportConfigEutra reportConfigA5;
+
+    void setupReportConfigurations();
 
     void printEvent(uint8_t event) ;
     uint32_t searchTargetEnb(Vector ueCurentPos, Vector uePreviousPosition);

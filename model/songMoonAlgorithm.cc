@@ -39,12 +39,19 @@ LteHandoverManagementSapProvider *songMoonAlgorithm::GetLteHandoverManagementSap
     return m_handoverManagementSapProvider;
 }
 
-void songMoonAlgorithm::DoInitialize()
-{
+void songMoonAlgorithm::setupReportConfigurations(){
     ns3::Time ttt = MilliSeconds(10);
     uint8_t hysteresisIeValue = EutranMeasurementMapping::ActualHysteresis2IeValue (7);
+    //Event A1 setup
+    reportConfigA1.eventId = LteRrcSap::ReportConfigEutra::EVENT_A1;
+    reportConfigA1.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA1.threshold1.range = 20; //serving cell threshold
+    reportConfigA1.timeToTrigger = 10; //ms
+    reportConfigA1.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
+    reportConfigA1.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
+    m_measId_A1 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA1);
 
-    LteRrcSap::ReportConfigEutra reportConfigA2;
+    //event A2
     reportConfigA2.eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
     reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRP;
     reportConfigA2.threshold1.range = 20; //serving cell threshold
@@ -54,15 +61,38 @@ void songMoonAlgorithm::DoInitialize()
     reportConfigA2.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
     m_measId_A2 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA2);
 
-    LteRrcSap::ReportConfigEutra reportConfigA1;
-    reportConfigA2.eventId = LteRrcSap::ReportConfigEutra::EVENT_A1;
-    reportConfigA2.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
-    reportConfigA2.threshold1.range = 20; //serving cell threshold
-    reportConfigA2.timeToTrigger = 10; //ms
-    reportConfigA2.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
-    reportConfigA2.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
-    m_measId_A1 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover(reportConfigA2);
+    //Event A3
+    reportConfigA3.eventId = LteRrcSap::ReportConfigEutra::EVENT_A3;
+    reportConfigA3.a3Offset = 0;
+    reportConfigA3.hysteresis = hysteresisIeValue;
+    reportConfigA3.timeToTrigger = ttt.GetMilliSeconds();
+    reportConfigA3.reportOnLeave = false;
+    reportConfigA3.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRP;
+    reportConfigA3.reportInterval = LteRrcSap::ReportConfigEutra::MS1024;
+    m_measId_A3 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover (reportConfigA3);
 
+    //event A4
+    reportConfigA4.eventId = LteRrcSap::ReportConfigEutra::EVENT_A4;
+    reportConfigA4.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA4.threshold1.range = 0; // intentionally very low threshold
+    reportConfigA4.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
+    reportConfigA4.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
+    m_measId_A4 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover (reportConfigA4);
+
+    //event A5
+    reportConfigA5.eventId = LteRrcSap::ReportConfigEutra::EVENT_A5;
+    reportConfigA5.threshold1.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA5.threshold1.range = 0; // intentionally very low threshold
+    reportConfigA5.threshold2.choice = LteRrcSap::ThresholdEutra::THRESHOLD_RSRQ;
+    reportConfigA5.threshold2.range = 0; // intentionally very low threshold
+    reportConfigA5.triggerQuantity = LteRrcSap::ReportConfigEutra::RSRQ;
+    reportConfigA5.reportInterval = LteRrcSap::ReportConfigEutra::MS240;
+    m_measId_A5 = m_handoverManagementSapUser->AddUeMeasReportConfigForHandover (reportConfigA5);
+}
+
+void songMoonAlgorithm::DoInitialize()
+{
+    setupReportConfigurations();
     LteHandoverAlgorithm::DoInitialize();
 }
 
@@ -205,20 +235,21 @@ void songMoonAlgorithm::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults mea
                     if(ongoingIt == handoverEvents.end()){
                         m_handoverManagementSapUser
                             ->TriggerHandover(rnti, targetCell);
-                        std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
-                            " t-> "<< Simulator::Now().GetSeconds() << std::endl;
+                        // std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
+                        //     " t-> "<< Simulator::Now().GetSeconds() << std::endl;
                         handoverEvents[measResults.imsi] = rnti;
                     } else {
                         if(ongoingIt->second != rnti){
                             ongoingIt->second = rnti;
                             m_handoverManagementSapUser
                             ->TriggerHandover(rnti, targetCell);
-                            std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
-                                " t-> "<< Simulator::Now().GetSeconds() << std::endl;
+                            // std::cout << " rnti " << rnti << " imsi " << measResults.imsi << " target cell " << targetCell<<
+                            //     " t-> "<< Simulator::Now().GetSeconds() << std::endl;
                         }
                     }
             }
         }
     }
+    std::cout << "measurent IMSI " << measResults.imsi << std::endl;
 }
 } // namespace ns3
