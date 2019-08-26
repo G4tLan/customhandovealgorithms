@@ -24,7 +24,17 @@ TypeId songMoonAlgorithm::GetTypeId()
     static TypeId tid = TypeId("ns3::songMoonAlgorithm")
                             .SetParent<LteHandoverAlgorithm>()
                             .SetGroupName("Lte")
-                            .AddConstructor<songMoonAlgorithm>();
+                            .AddConstructor<songMoonAlgorithm>()
+                            .AddAttribute ("NumberOfNeighbours",
+                                "number of neighbours",
+                                UintegerValue (2),
+                                MakeUintegerAccessor (&songMoonAlgorithm::numOfEnbs),
+                                MakeUintegerChecker<uint8_t> ())
+                            .AddAttribute ("ThresholdChange",
+                                "number of neighbours",
+                                UintegerValue (2),
+                                MakeUintegerAccessor (&songMoonAlgorithm::thresholdChange),
+                                MakeUintegerChecker<uint8_t> ());
 
     return tid;
 }
@@ -116,7 +126,9 @@ void songMoonAlgorithm::printEvent(uint8_t event)
         break;
     }
 }
-
+bool ns3::songMoonAlgorithm::updateMeasConf = false;
+int ns3::songMoonAlgorithm::updated = 0;
+int ns3::songMoonAlgorithm::thresholdSet = -1;
 void songMoonAlgorithm::setCellId(uint16_t _cellId) {
     cellId = (uint32_t)_cellId;
 }
@@ -250,6 +262,36 @@ void songMoonAlgorithm::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults mea
             }
         }
     }
-    std::cout << "measurent IMSI " << measResults.imsi << std::endl;
+    if(updateMeasConf){
+        if(thresholdSet == 0){
+            reportConfigA1.threshold1.range += thresholdChange;
+            reportConfigA2.threshold1.range += thresholdChange;
+            reportConfigA5.threshold1.range += thresholdChange;
+            reportConfigA4.threshold1.range -= thresholdChange;
+            reportConfigA5.threshold2.range -= thresholdChange;
+        } else if(thresholdSet == 1){
+            reportConfigA1.threshold1.range -= thresholdChange;
+            reportConfigA2.threshold1.range -= thresholdChange;
+            reportConfigA5.threshold1.range -= thresholdChange;
+            reportConfigA4.threshold1.range += thresholdChange;
+            reportConfigA5.threshold2.range += thresholdChange;
+        }
+        m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA1);
+        m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA1);
+        m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA2);
+        m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA2);
+        m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA3);
+        m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA3);
+        m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA4);
+        m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA4);
+        m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA5);
+        m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA5);
+        updated+=1;
+        if(updated >= numOfEnbs){
+            updateMeasConf = false;
+            updated = 0;
+            std::cout << "reset" << std::endl;
+        }
+    }
 }
 } // namespace ns3

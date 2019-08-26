@@ -41,11 +41,24 @@ public:
     virtual LteHandoverManagementSapProvider *GetLteHandoverManagementSapProvider();
 
     friend class MemberLteHandoverManagementSapProvider<songMoonAlgorithm>;
+    struct RLFStats {
+        double HPI;
+        double RLFLate;
+        double RLFEarly;
+    };
+    static int updated;
+    static bool updateMeasConf;
+    static int thresholdSet; //0 first, 1 second, 2 both
 
-    static double hpi;
-    static void updateParameters(double hpi) {
-
-        // std::cout << "\n HPI " << hpi << std::endl << std::endl;
+    static void updateParameters(RLFStats values) {
+        int c = 0;
+        if(values.RLFLate >= 0.03){
+            c++;
+        }
+        if(values.RLFEarly >= 0.03){
+            c++;
+        }
+        thresholdSet = c;
     }
 protected:
     //inherited from object
@@ -76,6 +89,9 @@ private:
     LteRrcSap::ReportConfigEutra reportConfigA3;
     LteRrcSap::ReportConfigEutra reportConfigA4;
     LteRrcSap::ReportConfigEutra reportConfigA5;
+
+    int numOfEnbs;
+    int thresholdChange;
 
     void setupReportConfigurations();
 
