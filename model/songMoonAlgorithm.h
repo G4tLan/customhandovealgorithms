@@ -42,6 +42,11 @@ public:
 
     friend class MemberLteHandoverManagementSapProvider<songMoonAlgorithm>;
 
+    static double hpi;
+    static void updateParameters(double hpi) {
+
+        // std::cout << "\n HPI " << hpi << std::endl << std::endl;
+    }
 protected:
     //inherited from object
     virtual void DoInitialize();
@@ -84,6 +89,7 @@ private:
         // std::cout << "{ a: " << a << ",b: "<< b << ",c: " << c << "} ratio " << ratio << std::endl;
         return acos(std::max(std::min(ratio,1.0),-1.0));
     }
+
 };
 } // namespace ns3
 
