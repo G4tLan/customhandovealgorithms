@@ -17,6 +17,7 @@
 #include <ns3/Enbs.h>
 #include <ns3/ptr.h>
 #include <ns3/UE.h>
+#include <vector>
 #include <map>
 
 namespace ns3
@@ -47,11 +48,11 @@ public:
         double RLFLate;
         double RLFEarly;
     };
-    static int updated;
-    static bool updateMeasConf;
+    static std::vector<uint16_t> cellsToUpdate;
+    static std::vector<uint16_t> cellsPowerToUpdate;
     static int thresholdSet; //0 first, 1 second, 2 both
 
-    static void updateParameters(RLFStats values) {
+    static void updateParameters(RLFStats values, uint16_t _cellId) {
         int c = 0;
         if(values.RLFLate >= 0.03){
             c++;
@@ -60,6 +61,21 @@ public:
             c++;
         }
         thresholdSet = c;
+        if(_cellId){
+            bool found = false;
+            for(auto it: cellsToUpdate){
+                if(it == _cellId){
+                    found = true;
+                    break;
+                }
+            }
+            if(!found){
+                cellsToUpdate.push_back(_cellId);
+                if(values.HPI >= 0.3){
+                    cellsPowerToUpdate.push_back(_cellId);
+                }
+            }
+        }
     }
 protected:
     //inherited from object
@@ -94,6 +110,8 @@ private:
     int numOfEnbs;
     int thresholdChange;
 
+    double transmitPower;
+
     bool hasBeenReset;
 
     void setupReportConfigurations();
@@ -119,6 +137,9 @@ private:
         // std::cout << "{ a: " << a << ",b: "<< b << ",c: " << c << "} ratio " << ratio << std::endl;
         return acos(std::max(std::min(ratio,1.0),-1.0));
     }
+
+    void updateThreshold(uint16_t rnti);
+    void updateTxPower();
 
 };
 } // namespace ns3

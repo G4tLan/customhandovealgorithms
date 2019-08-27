@@ -12,6 +12,7 @@ songMoonAlgorithm::songMoonAlgorithm() : m_handoverManagementSapUser(0)
 {
     m_handoverManagementSapProvider = new MemberLteHandoverManagementSapProvider<songMoonAlgorithm>(this);
     handoverEvents = {};
+    hasBeenReset = true;
 }
 
 songMoonAlgorithm::~songMoonAlgorithm()
@@ -34,7 +35,12 @@ TypeId songMoonAlgorithm::GetTypeId()
                                 "number of neighbours",
                                 UintegerValue (2),
                                 MakeUintegerAccessor (&songMoonAlgorithm::thresholdChange),
-                                MakeUintegerChecker<uint8_t> ());
+                                MakeUintegerChecker<uint8_t> ())
+                            .AddAttribute ("TxPower",
+                                "number of neighbours",
+                                DoubleValue (43),
+                                MakeDoubleAccessor (&songMoonAlgorithm::transmitPower),
+                                MakeDoubleChecker<double> ());
 
     return tid;
 }
@@ -126,8 +132,8 @@ void songMoonAlgorithm::printEvent(uint8_t event)
         break;
     }
 }
-bool ns3::songMoonAlgorithm::updateMeasConf = false;
-int ns3::songMoonAlgorithm::updated = 0;
+std::vector<uint16_t> ns3::songMoonAlgorithm::cellsToUpdate(0);
+std::vector<uint16_t> ns3::songMoonAlgorithm::cellsPowerToUpdate(0);
 int ns3::songMoonAlgorithm::thresholdSet = -1;
 void songMoonAlgorithm::setCellId(uint16_t _cellId) {
     cellId = (uint32_t)_cellId;
@@ -262,7 +268,21 @@ void songMoonAlgorithm::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults mea
             }
         }
     }
-    if(updateMeasConf){
+    updateThreshold(rnti);
+    
+}
+
+void songMoonAlgorithm::updateThreshold(uint16_t rnti){
+    bool found = false;
+    int index = 0;
+    for(auto it: cellsToUpdate){
+        if(it == cellId){
+            found = true;
+            break;
+        }
+        index++;
+    }
+    if(found){
         if(thresholdSet == 0){
             reportConfigA1.threshold1.range += thresholdChange;
             reportConfigA2.threshold1.range += thresholdChange;
@@ -276,6 +296,38 @@ void songMoonAlgorithm::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults mea
             reportConfigA4.threshold1.range += thresholdChange;
             reportConfigA5.threshold2.range += thresholdChange;
         }
+        uint8_t ulimit = 25;
+        uint8_t llimit = 15; 
+        if(reportConfigA1.threshold1.range >= ulimit){
+            reportConfigA1.threshold1.range = ulimit;
+        }
+        if(reportConfigA2.threshold1.range >= ulimit){
+            reportConfigA2.threshold1.range = ulimit;
+        }
+        if(reportConfigA5.threshold1.range >= ulimit){
+            reportConfigA5.threshold1.range = ulimit;
+        }
+        if(reportConfigA4.threshold1.range <= llimit){
+            reportConfigA4.threshold1.range = llimit;
+        }
+        if(reportConfigA4.threshold2.range <= llimit){
+            reportConfigA4.threshold2.range = llimit;
+        }
+        if(reportConfigA1.threshold1.range <= llimit){
+            reportConfigA1.threshold1.range = llimit;
+        }
+        if(reportConfigA2.threshold1.range <= llimit){
+            reportConfigA2.threshold1.range = llimit;
+        }
+        if(reportConfigA5.threshold1.range <= llimit){
+            reportConfigA5.threshold1.range = llimit;
+        }
+        if(reportConfigA4.threshold1.range >= ulimit){
+            reportConfigA4.threshold1.range = ulimit;
+        }
+        if(reportConfigA5.threshold2.range >= ulimit){
+            reportConfigA5.threshold2.range = ulimit;
+        }
         m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA1);
         m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA1);
         m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA2);
@@ -286,12 +338,27 @@ void songMoonAlgorithm::DoReportUeMeas(uint16_t rnti, LteRrcSap::MeasResults mea
         m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA4);
         m_handoverManagementSapUser->UpdateUEMeasReportConfig(reportConfigA5);
         m_handoverManagementSapUser->UpdateMeasConfigToUe(rnti,reportConfigA5);
-        updated+=1;
-        if(updated >= numOfEnbs){
-            updateMeasConf = false;
-            updated = 0;
-            std::cout << "reset" << std::endl;
+        if((int)cellsToUpdate.size() > index){
+            cellsToUpdate.erase(cellsToUpdate.begin()+index);
         }
+    }
+}
+
+void songMoonAlgorithm::updateTxPower(){
+    int index = 0;
+    for(auto it: cellsPowerToUpdate){
+        if(it == cellId){
+            break;
+        }
+        index++;
+    }
+    transmitPower+=1;
+    if(transmitPower >= 50){
+        transmitPower = 50;
+    }
+    m_handoverManagementSapUser->UpdateTransmissionPower(transmitPower);
+    if((int)cellsPowerToUpdate.size() > index){
+        cellsPowerToUpdate.erase(cellsPowerToUpdate.begin()+index);
     }
 }
 } // namespace ns3
