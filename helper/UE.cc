@@ -35,7 +35,6 @@ void UE::createInitialUePositions(std::map<uint32_t,  ns3::Vector> enpPos){
 
 void UE::updateUePositionHistory()
 {
-	double currentTime = Simulator::Now().GetSeconds();
 	for (uint32_t n = 0; n < UENodes.GetN(); n++)
 	{
 		Ptr<Node> node = UENodes.Get(n)->GetObject<Node>();
@@ -78,8 +77,7 @@ void UE::updateUePositionHistory()
 			}
 		}
 	}
-	double t = currentTime + 0.1;
-	Simulator::Schedule(Seconds(t >= simulationTime ? simulationTime : t),
+	Simulator::Schedule(Seconds(0.5),
 						&UE::updateUePositionHistory, this);
 }
 
@@ -95,7 +93,7 @@ xCenter(0), yCenter(0), radius(0), loggingDistance(30) {
 	UeMobilityHelper.Install(UENodes);
 	
 	std::srand(5);
-	double speed = 50;
+	double speed =16.667;
 	std::cout << "speeds " << std::endl;
 	for (uint n = 0; n < UENodes.GetN(); n++) {
 		Ptr<ConstantVelocityMobilityModel> mob  =
