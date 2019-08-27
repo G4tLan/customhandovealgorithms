@@ -60,8 +60,8 @@ void UE::updateUePositionHistory()
 		{
 			if (calculateDistance(mob->GetPosition(), it->second.p2) >= loggingDistance)
 			{
-				int xminBound = 30, xmaxBound = 950;
-				int yminBound = 30, ymaxBound = 950;
+				int xminBound = 0, xmaxBound = 1500;
+				int yminBound = 0, ymaxBound = 1500;
 
 				if((xminBound > mob->GetPosition().x || xmaxBound < mob->GetPosition().x)
 					|| (yminBound > mob->GetPosition().y || ymaxBound < mob->GetPosition().y)

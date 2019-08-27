@@ -164,7 +164,7 @@ Ptr<ListPositionAllocator> Enbs::generateEnbLocationsHex(int numOfEnbs,
 		Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<
 				ListPositionAllocator>();
 
-		Vector refPoint = Vector(512, 512, 0);
+		Vector refPoint = Vector(800, 800, 0);
 		enbPositionAlloc->Add(refPoint);
 		std::vector<Vector> points = generatePoints(refPoint, distance);
 
