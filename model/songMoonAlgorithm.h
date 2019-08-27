@@ -42,6 +42,7 @@ public:
 
     friend class MemberLteHandoverManagementSapProvider<songMoonAlgorithm>;
     struct RLFStats {
+        int RLF;
         double HPI;
         double RLFLate;
         double RLFEarly;
@@ -92,6 +93,8 @@ private:
 
     int numOfEnbs;
     int thresholdChange;
+
+    bool hasBeenReset;
 
     void setupReportConfigurations();
 
